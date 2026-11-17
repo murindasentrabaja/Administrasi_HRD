@@ -251,8 +251,8 @@ table.pg .gt td{padding:2px 7px;line-height:1.4}
 .kopH .kh-ic{display:block;width:3.1mm;height:3.1mm;fill:none;stroke:#004888;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .kopH .kh-adr .kh-ic{margin-top:.35mm}
 .kopH .kh-qr{flex:none;margin-left:5.2mm;line-height:0}
-.kopH .kh-rule{position:relative;height:.25mm;margin:5.2mm 17mm 0;background:#004888}
-.kopH .kh-rule:after{content:"";position:absolute;left:0;top:-.325mm;width:24mm;height:.9mm;background:#F8D000}
+.kopH .kh-sec{margin:4.8mm 17mm 0;line-height:0}
+.kopH .kh-sec svg{display:block;width:100%;height:auto}
 .paper.kop .kopno{text-align:right;font:7pt/1.3 Inter,Arial,sans-serif;color:var(--mu);margin:2.5mm 0 4mm}
 .paper.kop .kpad{height:0}
 .kopFlow{display:flex;align-items:flex-end;justify-content:flex-end;width:calc(100% + 34mm);height:19mm;margin:14mm -17mm 0;padding:0 17mm 4.4mm;background-position:left bottom;background-size:210mm 19mm;background-repeat:no-repeat;font:500 7pt/1.3 Inter,Arial,sans-serif;color:#475569}
@@ -264,7 +264,7 @@ table.pg .gt td{padding:2px 7px;line-height:1.4}
 .paper.kop .kopFlow{display:none}
 /* header kop ±31mm → jarak vertikal dirapatkan agar surat 1 halaman tetap muat */
 .paper.kop{font-size:9.2pt;line-height:1.5}
-.paper.kop .kopno{margin:1.5mm 0 1mm}
+.paper.kop .kopno{margin:2.4mm 0 1mm}
 .paper.kop .rule{margin-bottom:8px}
 .paper.kop .t{margin:6px 0}
 .paper.kop .sg{margin-top:10px}
@@ -272,6 +272,12 @@ table.pg .gt td{padding:2px 7px;line-height:1.4}
 .paper.kop .sg:not(.hasq) .sp{height:48px}
 .paper.kop .ds{margin-top:8px}
 }
+/* ===== v2 premium: rosette, plat seri, bingkai QR ===== */
+.kopH{position:relative;overflow:hidden}
+.kopH .kh-ros{position:absolute;right:-9mm;top:-4mm;width:50mm;height:50mm;opacity:.3;pointer-events:none}
+.kopH .kh-row,.kopH .kh-sec{position:relative;z-index:1}
+.kopH .kh-qr{padding:1mm;background:#fff;border:.25mm solid #004888;border-radius:1.2mm;box-shadow:0 0 0 .55mm #fff,0 0 0 .8mm #F8D000}
+.kopH .kh-adr{letter-spacing:.01em}
 </style><style id="pf"></style></head><body>
 <div class="app">
 <aside class="side"><div class="brand"><b>HR Digital</b><small>PT Murinda Sentra Baja</small></div><input id="fs" class="srch" placeholder="Cari formulir…" autocomplete="off"><div class="nav" id="nav"></div></aside>
@@ -302,8 +308,26 @@ const logo=LOGO?`<img class="lg" src="${LOGO}" alt="PT Murinda Sentra Baja">`:`<
 const wrap0=(f,b)=>`<table class="pg"><thead><tr><td><div class="hd">${logo}<div class="meta"><div class="mh">KONTROL DOKUMEN</div><div class="mr"><span>No. Form</span><b>${f.no}</b></div><div class="mr"><span>Revisi</span><b>${f.rev}</b></div></div></div><div class="hbar"></div></td></tr></thead><tbody><tr><td>${b}</td></tr></tbody></table>`;
 /* ===== KOP SURAT · desain vektor (SVG + HTML, tajam di layar maupun cetak; QR dibuat langsung dari fungsi ql) ===== */
 const KOP_WEB='https://murindasentrabaja.github.io/Company-Profile/';
-const KOP_BAR='<svg class="kh-bar" viewBox="0 0 210 3.2" preserveAspectRatio="none" aria-hidden="true"><rect width="210" height="3.2" fill="#004888"/><polygon points="151,0 210,0 210,3.2 147.8,3.2" fill="#F8D000"/></svg>';
-const KOP_F='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 19" width="210mm" height="19mm"><rect x="17" y="9.1" width="176" height=".25" fill="#004888"/><rect x="17" y="8.9" width="24" height=".65" fill="#F8D000"/><rect y="16.4" width="210" height="2.6" fill="#004888"/><polygon points="0,16.4 62,16.4 59.4,19 0,19" fill="#F8D000"/></svg>');
+const KOP_BAR='<svg class="kh-bar" viewBox="0 0 210 3.2" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="kbg" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#00264A"/><stop offset=".7" stop-color="#004888"/><stop offset="1" stop-color="#0A5DB0"/></linearGradient></defs><rect width="210" height="3.2" fill="url(#kbg)"/><polygon points="151,0 210,0 210,3.2 147.8,3.2" fill="#F8D000"/><polygon points="141,0 146,0 142.8,3.2 137.8,3.2" fill="#F8D000" opacity=".45"/><rect y="2.75" width="210" height=".1" fill="#fff" opacity=".3"/></svg>';
+const kopDid=()=>{try{return String(VALID||'')}catch(e){return ''}};
+const kopSeed=t=>{let h=2166136261;for(const c of t){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
+const kopRnd=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+/* teks mikro: terbaca hanya dengan kaca pembesar; tercetak sebagai garis, rusak (putus-putus/kabur) bila difotokopi atau dipindai */
+const kopMicroTxt=f=>{const u=['PT MURINDA SENTRA BAJA',f.no,kopDid()?'NO. DOK '+kopDid().toUpperCase():''].filter(Boolean).join(' · ')+' · ';let o='';while(o.length+u.length<=292)o+=u;return esc(o)};
+/* pita guilloche: pola garis halus yang fasenya ditentukan oleh nomor form + nomor dokumen, sehingga tiap dokumen punya pola berbeda */
+const _kg={};
+const kopGuil=f=>{const key=f.no+'|'+kopDid();if(_kg[key])return _kg[key];const r=kopRnd(kopSeed(key)),W=176,H=2.7,N=15,l1=7+r()*4,l2=40+r()*44,p0=r()*6.283,p1=r()*6.283,m=1,ep=.08+r()*.2;let d='';
+ for(let k=0;k<N;k++){let q='';for(let x=0;x<=W+.01;x+=.35){const y=H/2+(H/2-.12)*Math.sin(6.2832*x/l1+k*6.2832*m/N+p0)*(.74+.26*Math.cos(6.2832*x/l2+p1+k*ep));q+=(x?'L':'M')+x.toFixed(2)+' '+y.toFixed(2)}d+=q}
+ return _kg[key]=`<path d="${d}" fill="none" stroke="url(#kgg)" stroke-width=".085" stroke-linejoin="round"/>`};
+/* rosette guilloche (hypotrochoid): parameter ditentukan nomor form + nomor dokumen, jadi tiap dokumen punya rosette berbeda */
+const _kr={};
+const kopRos=f=>{const key=f.no+'|'+kopDid();if(_kr[key])return _kr[key];const r=kopRnd(kopSeed('ros'+key)),R=61,q=6+Math.floor(r()*4),d=q*(.6+r()*.35),k=R-q,T=6.2832*q;let p='';for(let t=0;t<=T+.001;t+=.04){const x=k*Math.cos(t)+d*Math.cos(k/q*t),y=k*Math.sin(t)-d*Math.sin(k/q*t);p+=(p?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)}
+ return _kr[key]=`<svg class="kh-ros" viewBox="-70 -70 140 140" aria-hidden="true"><path d="${p}Z" fill="none" stroke="#004888" stroke-width=".22" stroke-linejoin="round"/><circle r="66" fill="none" stroke="#004888" stroke-width=".25"/><circle r="63.6" fill="none" stroke="#F8D000" stroke-width=".4"/></svg>`};
+/* sidik jari dokumen: dihitung dari nomor form + nomor dokumen + seluruh isi surat; satu huruf berubah = kode berubah */
+const kopFp=(f,b)=>{const t=f.no+'|'+kopDid()+'|'+String(b||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim(),x=n=>n.toString(16).toUpperCase().padStart(8,'0');return 'MSB·'+x(kopSeed(t)).slice(0,4)+'·'+x(kopSeed([...t].reverse().join('')+'#')).slice(0,4)};
+const kopSec=(f,b)=>`<div class="kh-sec"><svg viewBox="0 0 176 3.7" aria-hidden="true"><defs><linearGradient id="kgg" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="176" y2="0"><stop offset="0" stop-color="#E8BE00"/><stop offset=".136" stop-color="#E8BE00"/><stop offset=".136" stop-color="#004888"/><stop offset="1" stop-color="#004888"/></linearGradient></defs>${kopGuil(f)}<text x="0" y="3.6" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size=".85" fill="#004888" textLength="176" lengthAdjust="spacing">${kopMicroTxt(f)}</text><rect x="127" y="0" width="49" height="3.7" fill="#fff"/><rect x="127.1" y=".3" width="48.8" height="3.1" fill="none" stroke="#004888" stroke-width=".1"/><rect x="127.1" y=".3" width="1.2" height="3.1" fill="#F8D000"/><text x="129.8" y="2.35" font-family="Arial,Helvetica,sans-serif" font-size="1.25" font-weight="700" fill="#004888" letter-spacing=".14">SERI KEAMANAN</text><text x="174.6" y="2.4" text-anchor="end" font-family="Courier New,monospace" font-size="1.65" font-weight="700" fill="#00264A">${kopFp(f,b)}</text></svg></div>`;
+const kopFoot=f=>'data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 19" width="210mm" height="19mm"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#004888"/><stop offset="1" stop-color="#00264A"/></linearGradient></defs><text x="17" y="9.3" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size=".85" fill="#004888" textLength="176" lengthAdjust="spacing">${kopMicroTxt(f)}</text><rect x="17" y="9.8" width="24" height=".5" fill="#F8D000"/><rect x="41" y="10.02" width="152" height=".06" fill="#004888" opacity=".35"/><rect y="16.4" width="210" height="2.6" fill="url(#g)"/><polygon points="0,16.4 62,16.4 59.4,19 0,19" fill="#F8D000"/><polygon points="151,16.4 156,16.4 153.4,19 148.4,19" fill="#F8D000" opacity=".5"/></svg>`);
+const kopTeks=f=>f.no+' · '+f.rev+(kopDid()?' · No. Dok '+kopDid().replace(/["\\\n]/g,''):'');
 const KI={
  pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
  tel:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
@@ -311,12 +335,12 @@ const KI={
  web:'<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>'
 };
 const kic=n=>`<svg class="kh-ic" viewBox="0 0 24 24" aria-hidden="true">${KI[n]}</svg>`;
-const kopHead=()=>`<header class="kopH" aria-label="Kop surat PT Murinda Sentra Baja">${KOP_BAR}<div class="kh-row"><img class="kh-logo" src="${LOGO}" alt="PT Murinda Sentra Baja"><div class="kh-adr">${kic('pin')}<div>Jl. Raya Kalijati Purwadadi No. 123A RT 006/02<br>Desa Kalijati Barat, Kec. Kalijati, Kab. Subang<br>Jawa Barat 41271 (Exit Toll Gate Kalijati)</div></div><div class="kh-div"></div><div class="kh-ctc">${kic('tel')}<span>(+62 260) 749 5467</span>${kic('mail')}<span>plant@murinda.com</span>${kic('web')}<span>www.murinda.com</span></div><div class="kh-qr">${ql(KOP_WEB,15.5)}</div></div><div class="kh-rule"></div></header>`;
+const kopHead=(f,b)=>`<header class="kopH" aria-label="Kop surat PT Murinda Sentra Baja">${KOP_BAR}${kopRos(f)}<div class="kh-row"><img class="kh-logo" src="${LOGO}" alt="PT Murinda Sentra Baja"><div class="kh-adr">${kic('pin')}<div>Jl. Raya Kalijati Purwadadi No. 123A RT 006/02<br>Desa Kalijati Barat, Kec. Kalijati, Kab. Subang<br>Jawa Barat 41271 (Exit Toll Gate Kalijati)</div></div><div class="kh-div"></div><div class="kh-ctc">${kic('tel')}<span>(+62 260) 749 5467</span>${kic('mail')}<span>plant@murinda.com</span>${kic('web')}<span>www.murinda.com</span></div><div class="kh-qr">${ql(KOP_WEB,13.2)}</div></div>${kopSec(f,b)}</header>`;
 const KOP_DEF=['HRD-03','HRD-04','HRD-26','HRD-27']; // dokumen yang memakai kop surat secara bawaan (surat & keputusan resmi); formulir lain bisa dinyalakan lewat tombol "Kop Surat"
 let KOPON={};try{KOPON=JSON.parse(localStorage.getItem('msb_kop')||'null')||Object.fromEntries(KOP_DEF.map(k=>[k,1]))}catch(e){KOPON=Object.fromEntries(KOP_DEF.map(k=>[k,1]))}
-const wrapKop=(f,b)=>`<table class="pg"><thead><tr><td><div class="kpad"></div></td></tr></thead><tbody><tr><td>${kopHead()}<div class="kopno">No. Form : ${f.no} · ${f.rev}</div>${b}</td></tr></tbody></table><div class="kopF kopFlow" style="background-image:url(&quot;${KOP_F}&quot;)">${f.no} · ${f.rev}</div>`;
+const wrapKop=(f,b)=>`<table class="pg"><thead><tr><td><div class="kpad"></div></td></tr></thead><tbody><tr><td>${kopHead(f,b)}<div class="kopno">No. Form : ${f.no} · ${f.rev}</div>${b}</td></tr></tbody></table><div class="kopF kopFlow" style="background-image:url(&quot;${kopFoot(f)}&quot;)">${esc(kopTeks(f))}</div>`;
 const wrap=(f,b)=>KOPON[cur]?wrapKop(f,b):wrap0(f,b);
-const kopPage=f=>`@page{size:A4;margin:0 0 19mm 0;@bottom-left{content:none}@bottom-right{content:none}@bottom-center{content:"${f.no} · ${f.rev}   ·   Halaman " counter(page) " dari " counter(pages);box-sizing:border-box;width:210mm;height:19mm;background:url("${KOP_F}") left bottom/210mm 19mm no-repeat;text-align:right;padding:0 17mm 4.4mm 0;vertical-align:bottom;font:500 7pt Inter,Arial,sans-serif;color:#475569}}`;
+const kopPage=f=>`@page{size:A4;margin:0 0 19mm 0;@bottom-left{content:none}@bottom-right{content:none}@bottom-center{content:"${kopTeks(f)}   ·   Halaman " counter(page) " dari " counter(pages);box-sizing:border-box;width:210mm;height:19mm;background:url("${kopFoot(f)}") left bottom/210mm 19mm no-repeat;text-align:right;padding:0 17mm 4.4mm 0;vertical-align:bottom;font:500 7pt Inter,Arial,sans-serif;color:#475569}}`;
 const sign=(l,n,sub)=>`<div><div class="sh">${l}</div><div class="sp"></div><u>${esc(n)||'&nbsp;'}</u><span>${sub}</span></div>`;
 
 const F={};
