@@ -139,8 +139,8 @@ table.jam{border-collapse:collapse;margin:0 0 2px}table.jam td{padding:2px 14px 
 .tgh,.tgr{display:flex;gap:6px;align-items:center;justify-content:space-between}.tgh{font-weight:700;color:#fff;margin-bottom:3px}.tgr{padding:2px 0}
 .tgr>span:first-child{min-width:0;flex:1}.tgr small{display:block;color:#7c8da3;font-size:10px}
 .tg a{display:inline!important;padding:0 3px;cursor:pointer;color:#93c5fd}.tg .tgm{display:block!important;margin-top:4px;font-size:11px}
-.ttd{display:flex;align-items:center;justify-content:center;gap:5px;font-size:6.4pt;line-height:1.25;text-align:left;font-weight:500;height:auto!important;min-height:15mm}
-.ttd b{font-size:7pt}
+.ttd{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;text-align:center;font-weight:500}.ttd small{font-size:5.4pt;line-height:1;color:#475569;letter-spacing:.2px}
+.s4.hasq .sp,.sg.hasq .sp{height:18mm}
 .vp{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}.vp .card{text-align:center}
 .vp table{width:100%;border-collapse:collapse;margin:10px 0;text-align:left}.vp td{padding:6px 0;border-bottom:1px solid var(--ln);font-size:13px}.vp td:first-child{color:var(--mu);width:38%}
 @media print{.mdl{display:none!important}}
@@ -422,12 +422,22 @@ const gate=h=>{let g=$('#gate');if(!g){g=document.createElement('div');g.id='gat
 const rowBuild=()=>{const f=F[cur],st=S[cur],row={};flat(f).forEach(x=>{if(x.h)row[x.h]=x.t=='tb'?JSON.stringify(st[x.k].filter(r=>r.some(Boolean))):st[x.k]});
  if(f.krit)KRIT.forEach((k,i)=>row[k.h]=st.k[i]>=0?`${k.lv[st.k[i]].l} (${fb(k.lv[st.k[i]].b)})`:'');Object.assign(row,f.x?f.x(st):{});row.Ringkasan=f.sum(st);return row};
 /* QR + kotak tanda tangan */
-const ql=u=>{const q=qrcode(0,'M');q.addData(u);q.make();const n=q.getModuleCount();let p='';for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))p+=`M${c} ${r}h1v1h-1z`;
- return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 ${n+2} ${n+2}" width="15mm" height="15mm" shape-rendering="crispEdges" style="flex:none;background:#fff"><path d="${p}" fill="#0A2A5E"/></svg>`};
-const ttdBox=t=>`${ql(DASAR+'?v='+t.kode)}<span><b>${esc(t.nama)}</b><br>${esc(t.jab||'')}<br>TTD digital · ${esc(t.waktu)}<br>${t.kode.replace(/(.{4})/g,'$1 ').trim()}</span>`;
+const ql=(u,mm)=>{const q=qrcode(0,u.length>110?'L':'M');q.addData(u);q.make();const n=q.getModuleCount();let p='';for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))p+=`M${c} ${r}h1v1h-1z`;
+ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 ${n+2} ${n+2}" width="${mm||15}mm" height="${mm||15}mm" shape-rendering="crispEdges" style="flex:none;background:#fff"><path d="${p}" fill="#0A2A5E"/></svg>`};
+/* Isi QR tanda tangan digital: true = link di kolom "Tanda Tangan Digital" sheet Master_Karyawan (dicocokkan lewat nama penandatangan);
+   bila penandatangan belum punya link, atau halaman dibuka lewat link pengisi, otomatis memakai QR verifikasi bawaan (?v=kode). false = selalu QR verifikasi. */
+const TTD_PAKAI_LINK_KARYAWAN=true;
+const ttdUrl=t=>{if(TTD_PAKAI_LINK_KARYAWAN){const n=String(t.nama||'').trim().toLowerCase(),e=n&&SUG.e.find(x=>x[0].toLowerCase()==n);if(e&&/^https?:\/\//i.test(e[4]||''))return e[4]}return DASAR+'?v='+t.kode};
+const ttdMark=t=>`${ql(ttdUrl(t),15)}<small>${t.kode.replace(/(.{4})/g,'$1 ').trim()}</small>`;
 function ttdPasang(){const P=$('#paper');if(!P||!TTD.length)return;const sl=[...P.querySelectorAll('.sp')],rest=[];
- TTD.forEach(t=>{const s=t.slot>=0?sl[t.slot]:null;if(s&&!s.dataset.q){s.dataset.q=1;s.classList.add('ttd');s.innerHTML=ttdBox(t)}else rest.push(t)});
- if(rest.length)P.insertAdjacentHTML('beforeend',`<div class="s4" style="grid-template-columns:repeat(${Math.min(rest.length,4)},1fr);margin-top:16px">${rest.map(t=>`<div>${esc(t.peran)}<div class="sp ttd">${ttdBox(t)}</div><p>Nama : ${esc(t.nama)}</p></div>`).join('')}</div>`)}
+ TTD.forEach(t=>{const s=t.slot>=0?sl[t.slot]:null;
+  if(s&&!s.dataset.q){s.dataset.q=1;s.classList.add('ttd');s.innerHTML=ttdMark(t);
+   const g=s.closest('.s4,.sg');if(g)g.classList.add('hasq');
+   // nama & tanggal cukup satu kali: baris "Tgl." di bawah QR diisi waktu tanda tangan, baris kosong diisi jabatan
+   const ps=[...s.parentElement.children].filter(x=>x.tagName=='P'),tg=ps.find(x=>/^Tgl\b/i.test(x.textContent.trim())),kos=ps.find(x=>!x.textContent.replace(/\u00a0/g,'').trim());
+   if(tg&&t.waktu)tg.textContent='Tgl. '+t.waktu;if(kos&&t.jab)kos.textContent='Jabatan : '+t.jab}
+  else rest.push(t)});
+ if(rest.length)P.insertAdjacentHTML('beforeend',`<div class="s4 hasq" style="grid-template-columns:repeat(${Math.min(rest.length,4)},1fr);margin-top:16px">${rest.map(t=>`<div>${esc(t.peran)}<div class="sp ttd">${ttdMark(t)}</div><p>Nama : ${esc(t.nama)}</p>${t.jab?`<p>Jabatan : ${esc(t.jab)}</p>`:''}<p>Tgl. ${esc(t.waktu||'')}</p></div>`).join('')}</div>`)}
 /* sambungkan ke fungsi yang sudah ada */
 const _draw=draw,_panel=panel,_hist=hist,_go=go;
 draw=function(){_draw();ttdPasang()};
@@ -471,7 +481,7 @@ const pick=(o,ks)=>{const lk=Object.keys(o);for(const k of ks){const f=lk.find(x
 function normKar(r){
  if(r&&!Array.isArray(r))r=r.data||r.rows||r.karyawan||r.list||Object.values(r);
  if(!Array.isArray(r))return[];
- return r.map(e=>Array.isArray(e)?[0,1,2,3].map(i=>String(e[i]==null?'':e[i]).trim()):[pick(e,['nama','nama karyawan','nama lengkap','name']),pick(e,['nik','n.i.k','nip']),pick(e,['jab','jabatan','posisi']),pick(e,['dept','departemen','department','bagian','divisi'])]).filter(e=>e[0])}
+ return r.map(e=>Array.isArray(e)?[0,1,2,3,4].map(i=>String(e[i]==null?'':e[i]).trim()):[pick(e,['nama','nama karyawan','nama lengkap','name']),pick(e,['nik','n.i.k','nip']),pick(e,['jab','jabatan','posisi']),pick(e,['dept','departemen','department','bagian','divisi']),pick(e,['ttd','tanda tangan digital','link ttd','link tanda tangan'])]).filter(e=>e[0])}
 const uniqSort=a=>{const m=new Map();a.forEach(v=>{v=String(v||'').trim();if(v&&!m.has(v.toLowerCase()))m.set(v.toLowerCase(),v)});return[...m.values()].sort((x,y)=>x.localeCompare(y,'id'))};
 function karSt(){const el=$('#pgKar');if(!el)return;el.className='kst '+KAR.st;el.innerHTML=esc(KAR.msg)+(KAR.st=='err'||KAR.st=='off'?' <button class="btn" type="button" id="karRe">Muat ulang</button>':'');const b=$('#karRe');if(b)b.onclick=()=>loadKar()}
 function loadKar(cb){
@@ -485,7 +495,7 @@ function loadKar(cb){
     SUG.dept=SUG0.dept.concat(uniqSort(e.map(x=>x[3])).filter(v=>!SUG0.dept.some(z=>z.toLowerCase()==v.toLowerCase())));
     KAR={st:'ok',msg:e.length+' karyawan dan '+SUG.jab.length+' jabatan dimuat dari Master_Karyawan.'}}
   }catch(x){KAR={st:'err',msg:'Format data karyawan tidak sesuai: '+x.message}}
-  buildDL();karSt();if(KAR.st=='err')toast(KAR.msg,1);cb&&cb()},
+  buildDL();karSt();if(KAR.st=='err')toast(KAR.msg,1);if(KAR.st=='ok'&&MODE=='adm'&&TTD.length)draw();cb&&cb()},
  er=>{KAR={st:'err',msg:'Daftar karyawan gagal dimuat: '+er.message};karSt();toast(KAR.msg,1);cb&&cb()})}
 // cocokkan nama: persis dulu; bila tidak ada, terima awalan/kata nama yang cocok dengan tepat satu karyawan
 const fndP=v=>{v=String(v||'').trim().toLowerCase();if(!v)return null;const x=fnd(v,0);if(x)return x;const m=SUG.e.filter(e=>{const n=e[0].toLowerCase();return n.startsWith(v)||n.split(/\s+/).includes(v)});return m.length==1?m[0]:null};
