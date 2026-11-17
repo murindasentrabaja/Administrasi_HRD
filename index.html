@@ -141,6 +141,7 @@ table.jam{border-collapse:collapse;margin:0 0 2px}table.jam td{padding:2px 14px 
 .tg a{display:inline!important;padding:0 3px;cursor:pointer;color:#93c5fd}.tg .tgm{display:block!important;margin-top:4px;font-size:11px}
 .ttd{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;text-align:center;font-weight:500}.ttd small{font-size:5.4pt;line-height:1;color:#475569;letter-spacing:.2px}
 .s4.hasq .sp,.sg.hasq .sp{height:18mm}
+.vq{margin-top:14px;padding:8px 10px;border:1px solid #CBD5E1;border-radius:6px;break-inside:avoid;font-size:8.4pt}.vq h4{margin:0 0 6px;font-size:8.6pt;letter-spacing:.4px}.vqg{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:flex-start}.vqi{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;max-width:36mm}.vqi b{font-size:7.4pt;line-height:1.25;font-weight:600}.vq small{display:block;margin-top:5px;font-size:7pt;color:#475569}
 .vp{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}.vp .card{text-align:center}
 .vp table{width:100%;border-collapse:collapse;margin:10px 0;text-align:left}.vp td{padding:6px 0;border-bottom:1px solid var(--ln);font-size:13px}.vp td:first-child{color:var(--mu);width:38%}
 @media print{.mdl{display:none!important}}
@@ -205,7 +206,7 @@ table.jam{border-collapse:collapse;margin:0 0 2px}table.jam td{padding:2px 14px 
 <div class="app">
 <aside class="side"><div class="brand"><b>HR Digital</b><small>PT Murinda Sentra Baja</small></div><input id="fs" class="srch" placeholder="Cari formulir…" autocomplete="off"><div class="nav" id="nav"></div></aside>
 <main class="work"><div class="tabs" id="tabs"><button data-tab="f" class="on">Formulir</button><button data-tab="h">Riwayat Dokumen</button><button data-tab="s">Status Pengisian</button></div>
-<div class="split" id="vF"><section class="panel" id="panel"></section><div class="stage"><div class="tb"><span class="grow" id="info"></span><button class="btn" onclick="reset()">Reset</button><button class="btn k" id="bs" onclick="save()">Simpan Dokumen</button><button class="btn p" onclick="window.print()">Cetak / PDF</button></div><div class="paper" id="paper"></div></div></div>
+<div class="split" id="vF"><section class="panel" id="panel"></section><div class="stage"><div class="tb"><span class="grow" id="info"></span><button class="btn" onclick="reset()">Reset</button><button class="btn" id="bv" onclick="valMuat()" title="Ambil ulang QR dari kolom Link Validasi sheet">QR Validasi</button><button class="btn k" id="bs" onclick="save()">Simpan Dokumen</button><button class="btn p" onclick="window.print()">Cetak / PDF</button></div><div class="paper" id="paper"></div></div></div>
 <section class="view" id="vH" hidden><div class="vh"><h2>Riwayat Dokumen</h2><input id="hq" class="srch" placeholder="Cari nama, tanggal, atau nomor dokumen…" autocomplete="off"><button class="btn" onclick="hist()">Muat ulang</button></div><div class="hist" id="hist"><small>—</small></div></section>
 <section class="view" id="vS" hidden><div class="vh"><h2>Status Pengisian</h2><button class="btn" onclick="tgsLoad()">Muat ulang</button></div><div class="hist" id="tgs"><small>—</small></div></section></main>
 </div><div id="dls"></div><div id="toast"></div>
@@ -355,7 +356,7 @@ function panel(){const f=F[cur],st=S[cur],G=g=>`<fieldset><legend>${g.t}</legend
 function draw(){const f=F[cur];$('#pf').textContent=`@page{@bottom-left{content:"PT Murinda Sentra Baja  ·  ${f.no}  ·  ${f.rev}";font:7.5pt Inter,Arial,sans-serif;color:#64748B}@bottom-right{content:"Halaman " counter(page) " dari " counter(pages);font:7.5pt Inter,Arial,sans-serif;color:#64748B}}`;$('#paper').innerHTML=wrap(f,f.draw(S[cur]));$('#info').textContent=f.krit?`Total nilai: ${fb(tot(S[cur]))} / ${MAX}`:'Pratinjau A4 · klik “Cetak / PDF” untuk mencetak'}
 function nav(){const q=($('#fs')||{value:''}).value.trim().toLowerCase();$('#nav').innerHTML=GRP.map(([g,ks])=>{ks=ks.filter(k=>!q||(F[k].t+' '+k+' '+F[k].sub).toLowerCase().includes(q));return ks.length?`<h3>${g}<em>${ks.length}</em></h3>`+ks.map(k=>`<button class="${k==cur?'on':''}" data-f="${k}"><i>${k}</i><b>${F[k].t}</b><span>${F[k].sub}</span></button>`).join(''):''}).join('')||'<small>Formulir tidak ditemukan</small>'}
 function go(k){cur=k;nav();panel();hist()}
-function reset(){if(confirm('Kosongkan isian form ini?')){S[cur]=init(cur);panel()}}
+function reset(){if(confirm('Kosongkan isian form ini?')){S[cur]=init(cur);VAL=[];VALID='';panel()}}
 // ===== SARAN ISIAN · data dari HR_Administrasi_Form.xlsx (Pengaturan & Master_Karyawan) =====
 const SUG={"dept": ["HRD", "GA (General Affairs)", "Finance & Accounting", "Purchasing", "Warehouse", "PPIC", "Production", "Engineering", "Quality Control", "QMS", "HSE", "Maintenance", "Security", "Marketing & Sales", "IT", "Project", "Logistik", "Tax & Legal", "Plant Management", "Direksi"], "jab": ["Bending", "Driver Production", "Fitter Counterweight", "Foreman Counterweight", "Helper", "Operator Bending", "Operator CNC", "Operator Produksi", "Painter", "Plant Production Engineer", "Qc Inspector Counterweight", "Supervisor Counterweight", "System & Administration", "Worker, Counterweight", "Worker, Cutting Drilling", "Worker, Expedition", "Worker, Painting", "Worker, Welder"], "gol": ["1", "2", "3", "4", "5", "6"], "stat": ["Percobaan", "Kontrak", "Tetap", "Magang", "Training"], "pnp": ["Kantor Pusat (HO)", "Plant Cikarang", "Plant Subang", "Project"], "pdd": ["SD", "SMP", "SMA/SMK", "D3", "S1/D4", "S2", "S3"], "lok": ["Dalam Kota", "Luar Kota", "Luar Pulau"], "pny": ["Internal", "Eksternal"], "kota": ["Cikarang", "Subang"], "e": []}; // daftar karyawan (NIK) TIDAK lagi ditanam di file ini; dimuat dari server setelah login HRD
 const EMPF=['HRD-24','HRD-26','HRD-27','HRD-05','HRD-07','HRD-08','HRD-11','HRD-35','HRD-37'];
@@ -400,9 +401,9 @@ function save(){const f=F[cur],st=S[cur],row={};flat(f).forEach(x=>{if(x.h)row[x
  if(f.krit)KRIT.forEach((k,i)=>row[k.h]=st.k[i]>=0?`${k.lv[st.k[i]].l} (${fb(k.lv[st.k[i]].b)})`:'');
  Object.assign(row,f.x?f.x(st):{});row.Ringkasan=f.sum(st);
  if(!online())return toast('Koneksi layanan belum dikonfigurasi. Silakan hubungi administrator sistem.',1);
- $('#bs').disabled=1;rpc('fbSimpan',[cur,row],r=>{$('#bs').disabled=0;toast('Dokumen berhasil disimpan · No. '+r.id+(r.sinkron?' · '+r.sinkron:''));hist()},e=>{$('#bs').disabled=0;toast(e.message,1)})}
+ $('#bs').disabled=1;rpc('fbSimpan',[cur,row],r=>{$('#bs').disabled=0;const m='Dokumen berhasil disimpan · No. '+r.id+(r.sinkron?' · '+r.sinkron:'');toast(m);hist();VAL=[];VALID=r.id;draw();valMuat(()=>VALADA&&toast(m+valInfo()))},e=>{$('#bs').disabled=0;toast(e.message,1)})}
 function loadRec(id){rpc('fbAmbil',[cur,id],rec=>{const f=F[cur],st=S[cur];flat(f).forEach(x=>{if(x.h&&rec[x.h]!==undefined&&rec[x.h]!==''){let v=rec[x.h];if(x.t=='tb'){try{v=JSON.parse(v);if(!v.length)v=[x.o.map(()=>'')]}catch(e){return}}st[x.k]=v}});
- if(f.krit)KRIT.forEach((k,i)=>{const l=String(rec[k.h]||'').replace(/\s*\(.*$/,'');st.k[i]=k.lv.findIndex(v=>v.l==l)});panel();toast('Data dimuat — siap dicetak ulang')},e=>toast(e.message,1))}
+ if(f.krit)KRIT.forEach((k,i)=>{const l=String(rec[k.h]||'').replace(/\s*\(.*$/,'');st.k[i]=k.lv.findIndex(v=>v.l==l)});VAL=[];VALID=id;panel();toast('Data dimuat — siap dicetak ulang');valMuat(()=>VALADA&&toast('Data dimuat — siap dicetak ulang'+valInfo()))},e=>toast(e.message,1))}
 document.addEventListener('input',e=>{const k=e.target.dataset.k;if(k){S[cur][k]=e.target.value;draw()}});
 document.addEventListener('click',e=>{const b=e.target.closest('button[data-i]'),n=e.target.closest('[data-f]'),h=e.target.closest('[data-id]');
  if(b){const i=+b.dataset.i,j=+b.dataset.j,st=S[cur];st.k[i]=st.k[i]===j?-1:j;b.parentNode.querySelectorAll('button').forEach((x,q)=>x.classList.toggle('on',st.k[i]===q));$('#d'+i).textContent=st.k[i]>=0?KRIT[i].lv[st.k[i]].d:'';draw()}
@@ -416,7 +417,7 @@ document.addEventListener('change',e=>{const el=e.target,k=el.dataset&&el.datase
 /* ===== TUGAS LINTAS DEPARTEMEN: link + token · status · TTD digital (QR) ===== */
 const Q=new URLSearchParams(location.search),TOK=Q.get('t')||'',VER=(Q.get('v')||'').trim(),MODE=VER?'ver':TOK?'isi':'adm';
 const DASAR=LINK_DASAR||location.origin+location.pathname;
-let TTD=[],TUG=null,PINV='',LNK=[];
+let TTD=[],TUG=null,PINV='',LNK=[],VAL=[],VALID='',VALADA=false;
 const cp=t=>navigator.clipboard?navigator.clipboard.writeText(t).then(()=>toast('Disalin ✓'),()=>prompt('Salin:',t)):prompt('Salin:',t);
 const gate=h=>{let g=$('#gate');if(!g){g=document.createElement('div');g.id='gate';g.className='mdl';document.body.appendChild(g)}g.innerHTML='<div class="card">'+h+'</div>'},gateOff=()=>{const g=$('#gate');if(g)g.remove()};
 const rowBuild=()=>{const f=F[cur],st=S[cur],row={};flat(f).forEach(x=>{if(x.h)row[x.h]=x.t=='tb'?JSON.stringify(st[x.k].filter(r=>r.some(Boolean))):st[x.k]});
@@ -438,11 +439,23 @@ function ttdPasang(){const P=$('#paper');if(!P||!TTD.length)return;const sl=[...
    if(tg&&t.waktu)tg.textContent='Tgl. '+t.waktu;if(kos&&t.jab)kos.textContent='Jabatan : '+t.jab}
   else rest.push(t)});
  if(rest.length)P.insertAdjacentHTML('beforeend',`<div class="s4 hasq" style="grid-template-columns:repeat(${Math.min(rest.length,4)},1fr);margin-top:16px">${rest.map(t=>`<div>${esc(t.peran)}<div class="sp ttd">${ttdMark(t)}</div><p>Nama : ${esc(t.nama)}</p>${t.jab?`<p>Jabatan : ${esc(t.jab)}</p>`:''}<p>Tgl. ${esc(t.waktu||'')}</p></div>`).join('')}</div>`)}
+/* ===== LINK VALIDASI: QR dari kolom "Link Validasi" di sheet (untuk form yang approvalnya dari spreadsheet lain via IMPORTRANGE) ===== */
+function valParse(r){VALADA=!!(r&&r.ada);return r&&Array.isArray(r.items)?r.items.filter(x=>x&&/^https?:\/\//i.test(x.url||'')):[]}
+function valInfo(){return VALADA?(VAL.length?' · QR validasi: '+VAL.length+' link':' · Link Validasi belum terisi di sheet'):''}
+function valPasang(){const P=$('#paper');if(!P||!VAL.length)return;const n=VAL.length,mm=u=>u.length>150?26:u.length>90?22:19;
+ const it=VAL.map((x,i)=>{let q;try{q=ql(x.url,mm(x.url))}catch(e){q='<small>Link terlalu panjang untuk QR</small>'}
+  return `<div class="vqi">${q}<b>${esc(x.label||(n>1?'Validasi '+(i+1):''))}</b></div>`}).join('');
+ P.insertAdjacentHTML('beforeend',`<div class="vq"><h4>VALIDASI APPROVAL</h4><div class="vqg">${it}</div><small>Pindai kode QR untuk memeriksa keabsahan approval dokumen ini.</small></div>`)}
+/* cb diberikan = pemanggilan otomatis (diam bila gagal); tanpa cb = tombol "QR Validasi" (menampilkan hasil/galat) */
+function valMuat(cb){if(!online()){if(!cb)toast('Koneksi layanan belum dikonfigurasi. Silakan hubungi administrator sistem.',1);return}
+ if(!VALID){if(!cb)toast('Simpan dokumen atau muat dari Riwayat dulu, lalu klik QR Validasi.',1);return}
+ const k=cur,id=VALID;
+ rpc('fbLinkValidasi',[k,id],r=>{if(cur!=k||VALID!=id)return;VAL=valParse(r);draw();if(cb)cb();else toast((VALADA?'Link Validasi dibaca':'Sheet '+k+' belum punya kolom Link Validasi')+valInfo())},e=>{if(!cb)toast(e.message,1)})}
 /* sambungkan ke fungsi yang sudah ada */
 const _draw=draw,_panel=panel,_hist=hist,_go=go;
-draw=function(){_draw();ttdPasang()};
+draw=function(){_draw();ttdPasang();valPasang()};
 hist=function(){if(MODE=='adm')_hist()};
-go=function(k){TTD=[];_go(k);tgsLoad()};
+go=function(k){TTD=[];VAL=[];VALID='';_go(k);tgsLoad()};
 panel=function(){_panel();if(MODE=='isi'&&TUG)isiSaring()};
 /* ---------- PENGISI (tanpa login: link + token + PIN) ---------- */
 function isiSaring(){const P=$('#panel'),ok=new Set(TUG.bagian.j||[]),sel=TUG.status=='Selesai';
@@ -525,7 +538,7 @@ function kirimDlg(){const lg=[...$('#panel').querySelectorAll('legend')].map(l=>
   rpc('tgsBuat',[cur,S[cur],ring,rows],r=>{LNK=r.tugas.map((t,i)=>mk(t,rows[i]));linkOut();tgsLoad()},e=>{$('#pgGo').disabled=false;toast(e.message,1)})}}
 function linkOut(){gate(`<h2>Paket pengiriman siap</h2><p>Pesan di bawah sudah memuat tautan dan PIN. Tautan hanya ditampilkan sekali pada layar ini, jadi kirim sekarang.</p>`+LNK.map((t,i)=>`<div class="pgr"><b>${esc(t.nama)}</b><textarea readonly onclick="this.select()">${esc(t.m)}</textarea><div class="act" style="justify-content:flex-start"><button class="btn" data-cp="${i}:u">Salin link</button><button class="btn" data-cp="${i}:m">Salin pesan lengkap</button><a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(t.m)}">Kirim via WhatsApp</a>${t.pin?`<button class="btn" data-cp="${i}:pin">Salin PIN ${t.pin}</button>`:''}</div></div>`).join('')+'<div class="act"><button class="btn p" id="pgX">Selesai</button></div>');$('#pgX').onclick=gateOff}
 function tgsLoad(){if(MODE!='adm'||!API_KEY||!$('#tgs'))return;rpc('tgsDaftar',[cur],r=>{$('#tgs').innerHTML=r.length?r.map(d=>`<div class="tg"><div class="tgh"><span>${esc(d.ringkasan||d.id)}</span><span class="st ${d.status}">${d.status}${d.status=='Berjalan'?' '+d.selesai+'/'+d.total:''}</span></div>${d.tugas.map(t=>`<div class="tgr"><span>${esc(t.nama)}<small>${esc(t.peran)}${t.selesai?' · selesai '+t.selesai:t.exp?' · s/d '+t.exp:''}</small></span><span class="st ${t.status}">${t.status}</span>${t.status=='Selesai'?'':`<a title="Kirim ulang link" data-tu="${d.id}|${t.no}">↻</a><a title="Batalkan" data-tb="${d.id}|${t.no}">✕</a>`}</div>`).join('')}<a class="tgm" data-tm="${d.id}">Muat dokumen ini</a></div>`).join(''):'<small>Belum ada tugas</small>'},()=>{})}
-function tgsMuat(id){rpc('tgsAmbil',[id],r=>{if(r.form!=cur)go(r.form);S[cur]=Object.assign(init(cur),r.dasar);TTD=r.ttd;panel();draw();toast('Dokumen dimuat. Klik “Simpan Dokumen” bila ingin menyimpan ulang.')},e=>toast(e.message,1))}
+function tgsMuat(id){rpc('tgsAmbil',[id],r=>{if(r.form!=cur)go(r.form);S[cur]=Object.assign(init(cur),r.dasar);TTD=r.ttd;VAL=[];VALID='';panel();draw();toast('Dokumen dimuat. Klik “Simpan Dokumen” bila ingin menyimpan ulang.')},e=>toast(e.message,1))}
 document.addEventListener('click',e=>{const c=e.target.closest('[data-cp]'),m=e.target.closest('[data-tm]'),u=e.target.closest('[data-tu]'),b=e.target.closest('[data-tb]');
  if(c){const[i,k]=c.dataset.cp.split(':');cp(LNK[+i][k])}
  else if(m)tgsMuat(m.dataset.tm);
