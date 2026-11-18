@@ -656,15 +656,17 @@ const ql=(u,mm)=>{const q=qrcode(0,u.length>110?'L':'M');q.addData(u);q.make();c
 /* Isi QR tanda tangan digital: true = link di kolom "Tanda Tangan Digital" sheet Master_Karyawan (dicocokkan lewat nama penandatangan);
    bila penandatangan belum punya link, atau halaman dibuka lewat link pengisi, otomatis memakai QR verifikasi bawaan (?v=kode). false = selalu QR verifikasi. */
 const TTD_PAKAI_LINK_KARYAWAN=true;
-const ttdUrl=t=>{if(TTD_PAKAI_LINK_KARYAWAN){const n=String(t.nama||'').trim().toLowerCase(),e=n&&SUG.e.find(x=>x[0].toLowerCase()==n);if(e&&/^https?:\/\//i.test(e[4]||''))return e[4]}return DASAR+'?v='+t.kode};
-const ttdMark=t=>`${ql(ttdUrl(t),15)}<small>${t.kode.replace(/(.{4})/g,'$1 ').trim()}</small>`;
+const ttdKar=t=>{if(!TTD_PAKAI_LINK_KARYAWAN)return'';if(/^https?:\/\//i.test(t.url||''))return t.url;const n=String(t.nama||'').trim().toLowerCase(),e=n&&SUG.e.find(x=>x[0].toLowerCase()==n);return e&&/^https?:\/\//i.test(e[4]||'')?e[4]:''};
+const ttdUrl=t=>ttdKar(t)||DASAR+'?v='+t.kode;
+const ttdMark=t=>{let q;try{q=ql(ttdUrl(t),15)}catch(e){q='<small>Link terlalu panjang untuk QR</small>'}return q+(ttdKar(t)?'':`<small>${t.kode.replace(/(.{4})/g,'$1 ').trim()}</small>`)};
+function slotIsi(s,html,nama,jab,waktu){s.classList.add('ttd');s.innerHTML=html;const g=s.closest('.s4,.sg');if(g)g.classList.add('hasq');const p=s.parentElement;if(!p)return;
+ const u=p.querySelector('u'),ps=[...p.children].filter(x=>x.tagName=='P'),nm=ps.find(x=>/^Nama\b/i.test(x.textContent.trim())),tg=ps.find(x=>/^Tgl\b/i.test(x.textContent.trim())),kos=ps.find(x=>!x.textContent.replace(/\u00a0/g,'').trim());
+ if(nama){if(u)u.textContent=nama;else if(nm)nm.textContent='Nama : '+nama}
+ if(waktu){if(tg)tg.textContent='Tgl. '+waktu;else p.insertAdjacentHTML('beforeend','<small class="aw">Tgl. '+esc(waktu)+'</small>')}
+ if(jab&&kos)kos.textContent='Jabatan : '+jab}
 function ttdPasang(){const P=$('#paper');if(!P||!TTD.length)return;const sl=[...P.querySelectorAll('.sp')],rest=[];
  TTD.forEach(t=>{const s=t.slot>=0?sl[t.slot]:null;
-  if(s&&!s.dataset.q){s.dataset.q=1;s.classList.add('ttd');s.innerHTML=ttdMark(t);
-   const g=s.closest('.s4,.sg');if(g)g.classList.add('hasq');
-   // nama & tanggal cukup satu kali: baris "Tgl." di bawah QR diisi waktu tanda tangan, baris kosong diisi jabatan
-   const ps=[...s.parentElement.children].filter(x=>x.tagName=='P'),tg=ps.find(x=>/^Tgl\b/i.test(x.textContent.trim())),kos=ps.find(x=>!x.textContent.replace(/\u00a0/g,'').trim());
-   if(tg&&t.waktu)tg.textContent='Tgl. '+t.waktu;if(kos&&t.jab)kos.textContent='Jabatan : '+t.jab}
+  if(s&&!s.dataset.q){s.dataset.q=1;slotIsi(s,ttdMark(t),t.nama,t.jab,t.waktu)}
   else rest.push(t)});
  if(rest.length)P.insertAdjacentHTML('beforeend',`<div class="s4 hasq" style="grid-template-columns:repeat(${Math.min(rest.length,4)},1fr);margin-top:16px">${rest.map(t=>`<div>${esc(t.peran)}<div class="sp ttd">${ttdMark(t)}</div><p>Nama : ${esc(t.nama)}</p>${t.jab?`<p>Jabatan : ${esc(t.jab)}</p>`:''}<p>Tgl. ${esc(t.waktu||'')}</p></div>`).join('')}</div>`)}
 /* ===== LINK VALIDASI: QR dari kolom "Link Validasi" di sheet (untuk form yang approvalnya dari spreadsheet lain via IMPORTRANGE) ===== */
