@@ -202,6 +202,29 @@ table.jam{border-collapse:collapse;margin:0 0 2px}table.jam td{padding:2px 14px 
 .ktt em{background:none;border:1px solid #CBD5E1;color:var(--mu)}
 .cb.on i{background:#fff;border-color:var(--ink)}.cb.on i:after{color:var(--ink)}
 .bx{background:none}
+</style><style id="v4">
+/* ===== REPORT MODERN: header tabel berwarna + garis halus; area lain tetap minim fill ===== */
+/* Tabel data (.gt): header navy solid, sudut membulat, pemisah baris hairline, tanpa zebra / kisi penuh */
+.gt{border-collapse:separate;border-spacing:0;border:1px solid var(--ln);border-radius:8px}
+.gt th{background:var(--ink);color:#fff;border:0;text-align:left;font-weight:700;font-size:7.4pt;letter-spacing:.09em;text-transform:uppercase;padding:5px 9px}
+.gt tr:first-child th:first-child{border-top-left-radius:7px}
+.gt tr:first-child th:last-child{border-top-right-radius:7px}
+.gt th+th{box-shadow:inset 1px 0 rgba(255,255,255,.14)}
+.gt td,table.pg .gt td{border:0;border-top:1px solid var(--ln);padding:5px 9px;vertical-align:top}
+.gt tr:first-child td{border-top:0}
+.gt tbody tr:nth-child(even) td,.gt tr:nth-child(even) td{background:none}
+/* Tabel penilaian (.kh / .kr / .tot): header navy, isi berbingkai tipis, total sebagai penutup */
+.kh{background:var(--ink);color:#fff;border:0;border-radius:7px 7px 0 0;font-size:7.4pt;letter-spacing:.09em;padding:5px 10px}
+.kr{border:1px solid var(--ln);border-top:0}.kr+.kr{border-top:0}
+.ktt{padding:3px 10px}.lv{padding:1.5px 10px}
+.tot{background:none;color:var(--ink);border:1px solid var(--ln);border-top:1.5px solid var(--ink);border-radius:0 0 8px 8px;padding:6px 12px}
+.tot b{color:var(--ac)}
+/* Kotak identitas dokumen (No./Rev./Tgl.): header kecil berwarna senada */
+.meta{border-radius:7px}
+.meta .mh{background:var(--ink);color:#fff;border-bottom:0;padding:3px 9px}
+/* Judul bagian: penanda aksen kecil + garis tipis, tanpa blok latar */
+.ps{gap:8px;border-bottom:1px solid var(--ln);padding:3px 0 5px;letter-spacing:.07em}
+.ps i{display:block;width:4px;height:12px;align-self:center;margin:0;border-radius:2px;background:var(--ac)}
 </style><style id="printfix">
 /* ===== PERBAIKAN CETAK =====
    Penyebab form tercetak kecil & "terlalu lebar": saat mencetak, lebar halaman A4 (~700px)
@@ -278,7 +301,55 @@ table.pg .gt td{padding:2px 7px;line-height:1.4}
 .kopH .kh-row,.kopH .kh-sec{position:relative;z-index:1}
 .kopH .kh-qr{padding:1mm;background:#fff;border:.25mm solid #004888;border-radius:1.2mm;box-shadow:0 0 0 .55mm #fff,0 0 0 .8mm #F8D000}
 .kopH .kh-adr{letter-spacing:.01em}
-</style><style id="pf"></style></head><body>
+</style><style id="v5">
+/* ===== REPORT SEGAR & PROFESIONAL (v5) =====
+   Palet: navy #0A2A5E (teks/judul), biru #0B4394 (aksen), merah #C4161C (goresan logo), permukaan pucat #F1F6FC, garis #C5D1E2.
+   Satu motif khas: goresan miring merah dari logo Murinda sebagai penanda bagian. Sisanya tenang: bingkai tipis, sudut membulat, huruf kecil biasa. */
+.paper{--lnS:#C5D1E2;--pale:#F1F6FC}
+/* Judul dokumen */
+.paper .tt h1{font-size:17pt;letter-spacing:.05em;color:var(--ink)}
+.paper .tt p{color:#4B5B73}
+/* Judul bagian: goresan merah + garis memudar */
+.paper .ps{display:flex;align-items:center;gap:9px;background:none;border:0;border-radius:0;padding:0;margin:9px 0 5px;font-size:10pt;font-weight:700;letter-spacing:0;color:var(--ink)}
+.paper .ps i{display:block;flex:none;width:5px;height:15px;margin:0 2px 0 4px;background:var(--rd);transform:skewX(-22deg);border-radius:1px}
+.paper .ps:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--lnS),rgba(197,209,226,0))}
+/* Kolom isian: kotak berbingkai, label kecil di dalam, ruang tulis lega */
+.paper .ig{display:flex;flex-wrap:wrap;gap:5px 10px;margin:0 0 5px;padding:0;background:none;border:0;border-radius:0}
+.paper .ig>div{flex:0 0 calc(50% - 5px);max-width:calc(50% - 5px);box-sizing:border-box;border:1px solid var(--lnS);border-radius:6px;padding:2.5px 9px 2.5px;background:#fff;min-height:8.6mm;break-inside:avoid}
+.paper .ig>div[style*="grid-column"]{flex-basis:100%;max-width:100%}
+.paper .ig span{font-size:7.2pt;font-weight:600;letter-spacing:.01em;text-transform:none;color:#5B6B82;margin:0 0 1px}
+.paper .ig b{border:0;min-height:1.35em;line-height:1.35;font-size:9.8pt;font-weight:600;color:var(--ink)}
+/* Petunjuk pengisian: callout pucat dengan garis biru */
+.paper .pet{background:var(--pale);border:1px solid #D3E1F2;border-left:4px solid var(--ac);border-radius:8px;padding:8px 13px;margin-bottom:12px}
+.paper .pet b{color:var(--ink)}
+/* Kotak catatan / kesimpulan */
+.paper .bx{border:1px solid var(--lnS);border-left:1px solid var(--lnS);border-radius:8px;background:#fff;padding:5px 12px 5px;margin:5px 0;min-height:12mm}
+.paper .bx h5{margin:0 0 4px;font-size:8.4pt;font-weight:700;letter-spacing:0;text-transform:none;color:var(--ink)}
+/* Tabel: baris isian lebih lega dan header lebih mantap */
+.paper .gt{margin:6px 0 12px;border-color:var(--lnS)}
+.paper .gt th{background:linear-gradient(90deg,var(--ink),var(--ac));padding:5px 10px}
+table.pg .gt td,.paper .gt td{border-top:1px solid var(--ln);padding:3.4px 10px;line-height:1.3}
+/* Butir bernomor (surat & perjanjian): nomor dalam lencana navy */
+.paper .t{grid-template-columns:26px 94px 1fr}
+.paper .t .n{display:flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--ink);color:#fff;font-size:7.6pt;font-weight:700;margin-top:1px}
+.paper .t .l{color:var(--ink)}
+/* Blok tanda tangan: kartu dengan judul peran */
+.paper .sg{gap:14px;margin-top:10px}
+.paper .sg>div{border:1px solid var(--lnS);border-radius:8px;padding:0 10px 4px;min-height:0;overflow:hidden;background:#fff}
+.paper .sg .sh{margin:0 -10px 2px;padding:3px 10px;background:var(--pale);border-bottom:1px solid #D3E1F2;color:var(--ink);font-weight:700;min-height:0}
+.paper .sg>div,.paper.kop .sg:not(.hasq)>div{min-height:0}
+.paper .sg u{min-width:72%;border-bottom:1px solid var(--ink)}
+.paper .sg:not(.hasq) .sp,.paper.kop .sg:not(.hasq) .sp{height:36px}
+.paper .sg span{color:#334155}
+/* Blok tanda tangan 4 kolom (penilaian) */
+.paper .s4{gap:9px}
+.paper .s4>div{border:1px solid var(--lnS);border-top:3px solid var(--ac);border-radius:8px;padding:6px 8px 6px;background:#fff}
+.paper .s4>div::first-line{font-weight:700;color:var(--ink)}
+.paper .s4 p{border-bottom:1px solid var(--ln)}
+/* Catatan distribusi */
+.paper .ds{margin-top:12px;padding:6px 10px;border:1px solid var(--ln);border-radius:6px;background:var(--pale);color:#4B5B73}
+</style>
+<style id="pf"></style></head><body>
 <div class="app">
 <aside class="side"><div class="brand"><b>HR Digital</b><small>PT Murinda Sentra Baja</small></div><input id="fs" class="srch" placeholder="Cari formulir…" autocomplete="off"><div class="nav" id="nav"></div></aside>
 <main class="work"><div class="tabs" id="tabs"><button data-tab="f" class="on">Formulir</button><button data-tab="h">Riwayat Dokumen</button><button data-tab="s">Status Pengisian</button></div>
