@@ -388,6 +388,21 @@ table.pg .gt td,.paper .gt td{border-top:1px solid var(--ln);padding:3.4px 10px;
 .paper .jw h4{color:var(--ac)}.paper .jw td{border-bottom:1px solid #EAEFF5}
 .paper .mt{border-color:#B7C6DA;border-radius:3px}
 .paper .ds,.paper .vq{border:1px solid var(--ln);border-radius:5px;background:var(--pale)}
+</style><style id="v7">
+/* ===== v7 · kolom tanda tangan digital di SEMUA form: QR, nama, jabatan, tanggal & waktu ===== */
+.paper .s4>div.sgn{padding:0 10px 4px;overflow:hidden;background:#fff;border:1px solid var(--ln);border-radius:8px;text-align:center}
+.paper .sgn .sh{margin:0 -10px 2px;padding:3px 10px;min-height:0;border-top:0;background:var(--pale);border-bottom:1px solid var(--ln);color:var(--ink);font-weight:600;text-align:center}
+.paper .sgn .sp{height:18mm;border:0;padding:0}
+.paper .sgn u{display:block;min-width:0;margin:3px 6px 0;padding:0 0 3px;border-bottom:1px solid #9DB0C9;font-size:9.8pt;font-weight:700;color:var(--ink);text-decoration:none}
+.paper .sgn span.jb{display:block;margin:3px 8px 0;font-size:8.2pt;font-weight:500;line-height:1.3;color:#5B6B82}
+.paper .sgn span.jb:empty{display:none}
+.paper .tw{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;margin:7px -10px -4px;border-top:1px solid var(--ln);background:var(--pale)}
+.paper .tw>div{border-top:0;display:flex;flex-direction:column;align-items:center;padding:3px 4px 4px;line-height:1.25}
+.paper .tw>div+div{border-left:1px solid var(--ln)}
+.paper .tw em{font-style:normal;font-size:6pt;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mu)}
+.paper .tw b{font-size:8.4pt;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.paper .s4 .sgn u{margin:3px 2px 0;font-size:8.8pt}
+.paper .s4 .sgn .tw b{font-size:7.8pt}
 </style><style id="pf"></style></head><body>
 <div class="app">
 <aside class="side"><div class="brand"><b>HR Digital</b><small>PT Murinda Sentra Baja</small></div><input id="fs" class="srch" placeholder="Cari formulir…" autocomplete="off"><div class="nav" id="nav"></div></aside>
@@ -659,16 +674,25 @@ const TTD_PAKAI_LINK_KARYAWAN=true;
 const ttdKar=t=>TTD_PAKAI_LINK_KARYAWAN&&/^https?:\/\//i.test(t.url||'')?t.url:''; // link kolom Digital Sign Master_Karyawan, dikirim server (ttd[].url)
 const ttdUrl=t=>ttdKar(t)||DASAR+'?v='+t.kode;
 const ttdMark=t=>{let q;try{q=ql(ttdUrl(t),15)}catch(e){q='<small>Link terlalu panjang untuk QR</small>'}return q+(ttdKar(t)?'':`<small>${t.kode.replace(/(.{4})/g,'$1 ').trim()}</small>`)};
-function slotIsi(s,html,nama,jab,waktu){s.classList.add('ttd');s.innerHTML=html;const g=s.closest('.s4,.sg');if(g)g.classList.add('hasq');const p=s.parentElement;if(!p)return;
- const u=p.querySelector('u'),ps=[...p.children].filter(x=>x.tagName=='P'),nm=ps.find(x=>/^Nama\b/i.test(x.textContent.trim())),tg=ps.find(x=>/^Tgl\b/i.test(x.textContent.trim())),kos=ps.find(x=>!x.textContent.replace(/\u00a0/g,'').trim());
- if(nama){if(u)u.textContent=nama;else if(nm)nm.textContent='Nama : '+nama}
- if(waktu){if(tg)tg.textContent='Tgl. '+waktu;else p.insertAdjacentHTML('beforeend','<small class="aw">Tgl. '+esc(waktu)+'</small>')}
- if(jab&&kos)kos.textContent='Jabatan : '+jab}
+const twHtml=w=>{w=String(w||'').trim();const m=/^(\S+)\s+(\S+)/.exec(w);return `<div class="tw"><div><em>Tanggal</em><b>${esc(m?m[1]:w)}</b></div>${m?`<div><em>Waktu</em><b>${esc(m[2])}</b></div>`:''}</div>`};
+const kartuIsi=(role,qr,nama,jab,waktu)=>`<div class="sh">${esc(role)}</div><div class="sp ttd">${qr}</div><u>${esc(nama)||'&nbsp;'}</u>${jab?`<span class="jb">${esc(jab)}</span>`:''}${waktu?twHtml(waktu):''}`;
+const kartuHtml=(role,qr,nama,jab,waktu)=>`<div class="sgn">${kartuIsi(role,qr,nama,jab,waktu)}</div>`;
+/* Isi satu kolom tanda tangan (semua form): QR, nama, jabatan, tanggal & waktu dengan tata letak yang sama */
+function slotIsi(s,html,nama,jab,waktu){s.classList.add('ttd');s.innerHTML=html;const g=s.closest('.s4,.sg');if(g)g.classList.add('hasq');const p=s.parentElement;if(!p)return;p.classList.add('sgn');
+ const u=p.querySelector('u');
+ if(!u){ // kolom bergaya isian (mis. HRD-07): disusun ulang agar sama dengan kolom tanda tangan lain
+  const rn=[...p.childNodes].find(n=>n.nodeType==3&&n.textContent.trim()),nm=[...p.children].find(x=>x.tagName=='P'&&/^Nama\b/i.test(x.textContent.trim())),
+   nv=nama||(nm?nm.textContent.replace(/^\s*Nama\s*:\s*/i,'').trim():'');
+  p.innerHTML=kartuIsi(rn?rn.textContent.trim():'',html,nv,jab,waktu);return}
+ if(nama)u.textContent=nama;
+ const sub=u.nextElementSibling&&u.nextElementSibling.tagName=='SPAN'?u.nextElementSibling:null;
+ if(sub){if(jab)sub.textContent=jab;sub.classList.add('jb')}
+ if(waktu)p.insertAdjacentHTML('beforeend',twHtml(waktu))}
 function ttdPasang(){const P=$('#paper');if(!P||!TTD.length)return;const sl=[...P.querySelectorAll('.sp')],rest=[];
  TTD.forEach(t=>{const s=t.slot>=0?sl[t.slot]:null;
   if(s&&!s.dataset.q){s.dataset.q=1;slotIsi(s,ttdMark(t),t.nama,t.jab,t.waktu)}
   else rest.push(t)});
- if(rest.length)P.insertAdjacentHTML('beforeend',`<div class="s4 hasq" style="grid-template-columns:repeat(${Math.min(rest.length,4)},1fr);margin-top:16px">${rest.map(t=>`<div>${esc(t.peran)}<div class="sp ttd">${ttdMark(t)}</div><p>Nama : ${esc(t.nama)}</p>${t.jab?`<p>Jabatan : ${esc(t.jab)}</p>`:''}<p>Tgl. ${esc(t.waktu||'')}</p></div>`).join('')}</div>`)}
+ if(rest.length)P.insertAdjacentHTML('beforeend',`<div class="s4 hasq" style="grid-template-columns:repeat(${Math.min(rest.length,4)},1fr);margin-top:16px">${rest.map(t=>kartuHtml(t.peran,ttdMark(t),t.nama,t.jab,t.waktu)).join('')}</div>`)}
 /* ===== LINK VALIDASI: QR dari kolom "Link Validasi" di sheet (untuk form yang approvalnya dari spreadsheet lain via IMPORTRANGE) ===== */
 function valParse(r){VALADA=!!(r&&r.ada);return r&&Array.isArray(r.items)?r.items.filter(x=>x&&/^https?:\/\//i.test(x.url||'')):[]}
 function valInfo(){return(VALADA?(VAL.length?' · QR validasi: '+VAL.length+' link':' · Link Validasi belum terisi di sheet'):'')+apvInfo()}
@@ -683,17 +707,13 @@ function apvParse(r){APVG=r&&+r.galat||0;return r&&Array.isArray(r.approval)?r.a
 function apvInfo(){if(!APV.length)return'';const u=new Set(APV.map(a=>a.urut)).size,s=new Set(APV.filter(a=>a.sudah).map(a=>a.urut)).size;
  return' · Approval masuk: '+s+' dari '+u+(APVG?' · '+APVG+' sel IMPORTRANGE belum terbaca, coba lagi sebentar lagi':'')}
 function apvQr(a){if(!/^https?:\/\//i.test(a.ttd||''))return'';try{return ql(a.ttd,15)}catch(e){return'<small>Link terlalu panjang untuk QR</small>'}}
-function apvIsi(s,a){s.classList.add('ttd');s.innerHTML=apvQr(a);
- const g=s.closest('.s4,.sg');if(g)g.classList.add('hasq');
- const p=s.parentElement;if(!p)return;
- const u=p.querySelector('u'),ps=[...p.children].filter(x=>x.tagName=='P'),nm=ps.find(x=>/^Nama\b/i.test(x.textContent.trim())),tg=ps.find(x=>/^Tgl\b/i.test(x.textContent.trim()));
- if(a.nama){if(u)u.textContent=a.nama;else if(nm)nm.textContent='Nama : '+a.nama}
- if(a.waktu){if(tg)tg.textContent='Tgl. '+a.waktu;else p.insertAdjacentHTML('beforeend','<small class="aw">Tgl. '+esc(a.waktu)+'</small>')}}
+const apvJab=a=>{const e=fnd(a.nama,0);return e?e[2]:''};
+function apvIsi(s,a){slotIsi(s,apvQr(a),a.nama,apvJab(a),a.waktu)}
 function apvPasang(){const P=$('#paper');if(!P||!APV.length)return;
  const sl=[...P.querySelectorAll('.sp')],mp=APV_SLOT[cur]||[],rest=[],pakai={};
  APV.forEach(a=>{if(!a.sudah)return;const j=a.urut-1,i=mp[j]!==undefined?mp[j]:j,s=sl[i];
   if(s&&!s.classList.contains('ttd')&&!pakai[a.urut]){pakai[a.urut]=1;apvIsi(s,a)}else rest.push(a)});
- if(rest.length)P.insertAdjacentHTML('beforeend',`<div class="s4 hasq" style="grid-template-columns:repeat(${Math.min(rest.length,4)},1fr);margin-top:16px">${rest.map(a=>`<div>${esc(a.peran)}${a.label?' · '+esc(a.label):''}<div class="sp ttd">${apvQr(a)}</div><p>Nama : ${esc(a.nama)}</p><p>Tgl. ${esc(a.waktu||'')}</p></div>`).join('')}</div>`)}
+ if(rest.length)P.insertAdjacentHTML('beforeend',`<div class="s4 hasq" style="grid-template-columns:repeat(${Math.min(rest.length,4)},1fr);margin-top:16px">${rest.map(a=>kartuHtml(a.peran+(a.label?' · '+a.label:''),apvQr(a),a.nama,apvJab(a),a.waktu)).join('')}</div>`)}
 function valPasang(){const P=$('#paper');if(!P||!VAL.length)return;const n=VAL.length,mm=u=>u.length>150?26:u.length>90?22:19;
  const it=VAL.map((x,i)=>{let q;try{q=ql(x.url,mm(x.url))}catch(e){q='<small>Link terlalu panjang untuk QR</small>'}
   return `<div class="vqi">${q}<b>${esc(x.label||(n>1?'Validasi '+(i+1):''))}</b></div>`}).join('');
