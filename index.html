@@ -653,10 +653,10 @@ const rowBuild=()=>{const f=F[cur],st=S[cur],row={};flat(f).forEach(x=>{if(x.h)r
 /* QR + kotak tanda tangan */
 const ql=(u,mm)=>{const q=qrcode(0,u.length>110?'L':'M');q.addData(u);q.make();const n=q.getModuleCount();let p='';for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))p+=`M${c} ${r}h1v1h-1z`;
  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 ${n+2} ${n+2}" width="${mm||15}mm" height="${mm||15}mm" shape-rendering="crispEdges" style="flex:none;background:#fff"><path d="${p}" fill="#0A2A5E"/></svg>`};
-/* Isi QR tanda tangan digital: true = link di kolom "Tanda Tangan Digital" sheet Master_Karyawan (dicocokkan lewat nama penandatangan);
+/* Isi QR tanda tangan digital: true = link di kolom "Digital Sign" sheet Master_Karyawan (dicocokkan lewat nama penandatangan);
    bila penandatangan belum punya link, atau halaman dibuka lewat link pengisi, otomatis memakai QR verifikasi bawaan (?v=kode). false = selalu QR verifikasi. */
 const TTD_PAKAI_LINK_KARYAWAN=true;
-const ttdKar=t=>{if(!TTD_PAKAI_LINK_KARYAWAN)return'';if(/^https?:\/\//i.test(t.url||''))return t.url;const n=String(t.nama||'').trim().toLowerCase(),e=n&&SUG.e.find(x=>x[0].toLowerCase()==n);return e&&/^https?:\/\//i.test(e[4]||'')?e[4]:''};
+const ttdKar=t=>TTD_PAKAI_LINK_KARYAWAN&&/^https?:\/\//i.test(t.url||'')?t.url:''; // link kolom Digital Sign Master_Karyawan, dikirim server (ttd[].url)
 const ttdUrl=t=>ttdKar(t)||DASAR+'?v='+t.kode;
 const ttdMark=t=>{let q;try{q=ql(ttdUrl(t),15)}catch(e){q='<small>Link terlalu panjang untuk QR</small>'}return q+(ttdKar(t)?'':`<small>${t.kode.replace(/(.{4})/g,'$1 ').trim()}</small>`)};
 function slotIsi(s,html,nama,jab,waktu){s.classList.add('ttd');s.innerHTML=html;const g=s.closest('.s4,.sg');if(g)g.classList.add('hasq');const p=s.parentElement;if(!p)return;
